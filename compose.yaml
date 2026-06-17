@@ -35,13 +35,13 @@ services:
   # configure it here to watch the Docker events for new containers and to use
   # their labels for configuration. That's why the Docker socket is mounted.
   #
-  # We also expose port 80 to connect to the proxy from the host machine.
+  # We also expose port 8080 to connect to the proxy from the host machine.
   ###################################################
   proxy:
     image: traefik:v3.6
     command: --providers.docker
     ports:
-      - 80:80
+      - 8080:80
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
