@@ -1,33 +1,72 @@
 const db = require('../../src/persistence');
 const updateItem = require('../../src/routes/updateItem');
-const ITEM = { id: 12345 };
 
 jest.mock('../../src/persistence', () => ({
-    getItem: jest.fn(),
     updateItem: jest.fn(),
+    getItem: jest.fn(),
 }));
 
-test('it updates items correctly', async () => {
+test('it updates an item with new data', async () => {
+    const itemId = 'test-id-123';
     const req = {
-        params: { id: 1234 },
-        body: { name: 'New title', completed: false },
+        params: { id: itemId },
+        body: { name: 'Updated Item', completed: true },
     };
     const res = { send: jest.fn() };
 
-    db.getItem.mockReturnValue(Promise.resolve(ITEM));
+    db.getItem.mockReturnValue(
+        Promise.resolve({
+            id: itemId,
+            name: 'Updated Item',
+            completed: true,
+        }),
+    );
 
     await updateItem(req, res);
 
-    expect(db.updateItem.mock.calls.length).toBe(1);
-    expect(db.updateItem.mock.calls[0][0]).toBe(req.params.id);
-    expect(db.updateItem.mock.calls[0][1]).toEqual({
-        name: 'New title',
-        completed: false,
+    expect(db.updateItem).toHaveBeenCalledWith(itemId, {
+        name: 'Updated Item',
+        completed: true,
     });
+});
 
-    expect(db.getItem.mock.calls.length).toBe(1);
-    expect(db.getItem.mock.calls[0][0]).toBe(req.params.id);
+test('it retrieves the updated item from database', async () => {
+    const itemId = 'test-id-123';
+    const req = {
+        params: { id: itemId },
+        body: { name: 'Updated Item', completed: true },
+    };
+    const res = { send: jest.fn() };
 
-    expect(res.send.mock.calls[0].length).toBe(1);
-    expect(res.send.mock.calls[0][0]).toEqual(ITEM);
+    db.getItem.mockReturnValue(
+        Promise.resolve({
+            id: itemId,
+            name: 'Updated Item',
+            completed: true,
+        }),
+    );
+
+    await updateItem(req, res);
+
+    expect(db.getItem).toHaveBeenCalledWith(itemId);
+});
+
+test('it returns the updated item', async () => {
+    const itemId = 'test-id-123';
+    const updatedItem = {
+        id: itemId,
+        name: 'Updated Item',
+        completed: true,
+    };
+    const req = {
+        params: { id: itemId },
+        body: { name: 'Updated Item', completed: true },
+    };
+    const res = { send: jest.fn() };
+
+    db.getItem.mockReturnValue(Promise.resolve(updatedItem));
+
+    await updateItem(req, res);
+
+    expect(res.send).toHaveBeenCalledWith(updatedItem);
 });
